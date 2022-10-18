@@ -109,16 +109,18 @@ async def get_playlist():
 @app.put("/update-playlist")
 async def update_playlist(playlist_id: str, song_id: str, removeOrAdd: bool):
     table = _get_table()
-    item = _get_playlist(table)
+    item = _get_playlist(playlist_id, table)
 
-    if removeOrAdd:
-        # add a track
-        return item
-    else:
-        # remove the track
-        if not item:
-            raise HTTPException(status_code=404,
-                                detail=f"Playlist {playlist_id} not found!")
+    if item and song_id:
+        if removeOrAdd:
+            # add a track
+            songs = item["songs"]
+            return {"item": item}
+        else:
+            # remove the track
+            if not item:
+                raise HTTPException(status_code=404,
+                                    detail=f"Playlist {playlist_id} not found!")
 
 
 # # endpoint to delete a playlist
