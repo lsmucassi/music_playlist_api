@@ -38,6 +38,29 @@ def _get_table():
     return boto3.resource("dynamodb").Table(table_name)
 
 
+def _get_playlist(playlist_id: str, table):
+    response = table.get_item(Key={"playlist_id": playlist_id})
+    item = response.get("Item")
+
+    return item
+
+
+def _insert_playlist(item: dict, table):
+    # upload data to table
+    table.put_item(Item=item)
+
+
+def _get_all_playlists(table):
+    response = table.scan()
+    data = response['Items']
+
+    while 'LastEvaluatedKey' in response:
+        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+        data.extend(response['Items'])
+
+    return data
+
+
 # Root of the API
 @app.get("/")
 def root():
@@ -54,21 +77,18 @@ async def create_playlist(put_playlist_req: PutPlaylistReq):
         "user_id": put_playlist_req.user_id,
         "songs": put_playlist_req.songs,
     }
-
-    # upload data to table
     table = _get_table()
-    table.put_item(Item=item)
+    res = _insert_playlist(item, table)
 
-    return {"playlist": item}
+    return {"playlist": item, "response": res}
 
 
 # endpoint to get a single playlist
 @app.get("/get-playlist/{playlist_id")
 async def get_playlist(playlist_id: str):
     table = _get_table()
-    response = table.get_item(Key={"playlist_id": playlist_id})
-    item = response.get("Item")
 
+    item = _get_playlist(playlist_id, table)
     if not item:
         raise HTTPException(status_code=404,
                             detail=f"Playlist {playlist_id} not found!")
@@ -80,13 +100,7 @@ async def get_playlist(playlist_id: str):
 @app.get("/get-playlists")
 async def get_playlist():
     table = _get_table()
-
-    response = table.scan()
-    data = response['Items']
-
-    while 'LastEvaluatedKey' in response:
-        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
-        data.extend(response['Items'])
+    data = _get_all_playlists(table)
 
     return data
 
@@ -94,7 +108,18 @@ async def get_playlist():
 # # endpoint to update playlist: Remove or add songs
 @app.put("/update-playlist")
 async def update_playlist(playlist_id: str, song_id: str, removeOrAdd: bool):
-    
+    table = _get_table()
+    item = _get_playlist(table)
+
+    if removeOrAdd:
+        # add a track
+        return item
+    else:
+        # remove the track
+        if not item:
+            raise HTTPException(status_code=404,
+                                detail=f"Playlist {playlist_id} not found!")
+
 
 # # endpoint to delete a playlist
 # @app.delete("/delete-playlist/{playlist_id}")
