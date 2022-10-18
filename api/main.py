@@ -77,14 +77,24 @@ async def get_playlist(playlist_id: str):
 
 
 # # endpoint to get all playlists
-# @app.get("/get-playlists")
-# async def get_playlist(playlist_id: str):
-#     pass
+@app.get("/get-playlists")
+async def get_playlist():
+    table = _get_table()
+
+    response = table.scan()
+    data = response['Items']
+
+    while 'LastEvaluatedKey' in response:
+        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+        data.extend(response['Items'])
+
+    return data
+
 
 # # endpoint to update playlist: Remove or add songs
-# @app.put("/update-playlist")
-# async def update_playlist(put_playlist_req: PutPlaylistReq):
-#     pass
+@app.put("/update-playlist")
+async def update_playlist(playlist_id: str, song_id: str, removeOrAdd: bool):
+    
 
 # # endpoint to delete a playlist
 # @app.delete("/delete-playlist/{playlist_id}")
