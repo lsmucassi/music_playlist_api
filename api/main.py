@@ -1,11 +1,10 @@
 import os
 import uuid
-import time
 import boto3
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from pydantic import BaseModel
-from typing import Optional, List, Union
+from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -63,10 +62,19 @@ async def create_playlist(put_playlist_req: PutPlaylistReq):
     return {"playlist": item}
 
 
-# # endpoint to get a single playlist
-# @app.get("/get-playlist/{playlist_id")
-# async def get_playlist(playlist_id: str):
-#     pass
+# endpoint to get a single playlist
+@app.get("/get-playlist/{playlist_id")
+async def get_playlist(playlist_id: str):
+    table = _get_table()
+    response = table.get_item(Key={"playlist_id": playlist_id})
+    item = response.get("Item")
+
+    if not item:
+        raise HTTPException(status_code=404,
+                            detail=f"Playlist {playlist_id} not found!")
+
+    return item
+
 
 # # endpoint to get all playlists
 # @app.get("/get-playlists")
