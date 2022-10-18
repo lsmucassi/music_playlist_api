@@ -5,7 +5,7 @@ import boto3
 from fastapi import FastAPI
 from mangum import Mangum
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Union
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -20,15 +20,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # song schema
-class Song(BaseModel):
-    song_id: str
+# class Song(BaseModel):
+#     song_id: str
 
 
 # Playlist Model for Database
 class PutPlaylistReq(BaseModel):
-    songs: List[Song]
+    songs: list
+    # songs: Union[list[Song], None] = None
     playlist_id: Optional[str] = None
     user_id: Optional[str] = None
 
@@ -68,18 +68,15 @@ async def create_playlist(put_playlist_req: PutPlaylistReq):
 # async def get_playlist(playlist_id: str):
 #     pass
 
-
 # # endpoint to get all playlists
 # @app.get("/get-playlists")
 # async def get_playlist(playlist_id: str):
 #     pass
 
-
 # # endpoint to update playlist: Remove or add songs
 # @app.put("/update-playlist")
 # async def update_playlist(put_playlist_req: PutPlaylistReq):
 #     pass
-
 
 # # endpoint to delete a playlist
 # @app.delete("/delete-playlist/{playlist_id}")
