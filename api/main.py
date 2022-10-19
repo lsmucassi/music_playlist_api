@@ -63,21 +63,21 @@ def _get_all_playlists(table):
 
 
 def _update_playlist(playlist_id: str, songs: list, table):
-    
-    try:
-        response = table.update_item(Key = {
-        'playlist_id': playlist_id,
-    },
-    UpdateExpression = "set songs = :r",
-    ExpressionAttributeValues = {
-        ':r': songs,
-    },
-    ReturnValues = "UPDATED_NEW")
-    except:
-        return HTTPException(status_code=501,
-                    detail=f"Internal Server Error")
 
-    return response.status_code
+    try:
+        response = table.update_item(Key={
+            'playlist_id': playlist_id,
+        },
+                                     UpdateExpression="set songs = :r",
+                                     ExpressionAttributeValues={
+                                         ':r': songs,
+                                     },
+                                     ReturnValues="UPDATED_NEW")
+    except:
+        return HTTPException(status_code=500,
+                             detail=f"ERROR: Internal Server Error")
+
+    return response
 
 
 # Root of the API
@@ -126,22 +126,25 @@ async def get_playlist():
 
 # # endpoint to update playlist: Remove or add songs
 @app.put("/update-playlist")
-async def update_playlist(playlist_id: str, song_id: str, removeOrAdd: bool):
+async def update_playlist(playlist_id: str, song_id: str, add_track: bool):
     table = _get_table()
     item = _get_playlist(playlist_id, table)
     songs = []
 
     if item and song_id:
-        if removeOrAdd:
+        if add_track:
             # add a track
             songs = item["songs"]
-            if song_id in songs:
+            if song_id in songs: # if the song already exists
                 return HTTPException(
                     status_code=403,
-                    detail=f"Song {playlist_id} already exist in playlist")
-            else:
+                    detail=f"Song {song_id} already exist in playlist")
+            else: # add it to the list of songs in the playlist
                 songs.append(song_id)
-                res = _update_playlist(playlist_id, song_id, table)
+                res = _update_playlist(playlist_id, songs, table)
+                return HTTPException(
+                    status_code=res['ResponseMetadata']['HTTPStatusCode'],
+                    detail=f"Song {song_id} added to playlist")
 
         else:
             # remove the track
