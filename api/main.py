@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from urllib import response
 import uuid
@@ -20,15 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# song schema
-# class Song(BaseModel):
-#     song_id: str
-
 
 # Playlist Model for Database
 class PutPlaylistReq(BaseModel):
     songs: list
-    # songs: Union[list[Song], None] = None
+    created: datetime
     playlist_id: Optional[str] = None
     user_id: Optional[str] = None
 
@@ -48,7 +45,8 @@ def _get_playlist(playlist_id: str, table):
 
 def _insert_playlist(item: dict, table):
     # upload data to table
-    table.put_item(Item=item)
+    res = table.put_item(Item=item, ReturnValues="ALL_NEW")
+    return res
 
 
 def _get_all_playlists(table):
@@ -80,6 +78,10 @@ def _update_playlist(playlist_id: str, songs: list, table):
     return response
 
 
+def _response(status_code, message):
+    return HTTPException(status_code=status_code, detail=message)
+
+
 # Root of the API
 @app.get("/")
 def root():
@@ -95,11 +97,12 @@ async def create_playlist(put_playlist_req: PutPlaylistReq):
         "playlist_id": f"playlist_{uuid.uuid4().hex}",
         "user_id": put_playlist_req.user_id,
         "songs": put_playlist_req.songs,
+        "created": str(datetime.now())
     }
     table = _get_table()
     res = _insert_playlist(item, table)
 
-    return {"playlist": item, "response": res}
+    return {"playlist": item, "message": res}
 
 
 # endpoint to get a single playlist
@@ -109,10 +112,9 @@ async def get_playlist(playlist_id: str):
 
     item = _get_playlist(playlist_id, table)
     if not item:
-        raise HTTPException(status_code=404,
-                            detail=f"Playlist {playlist_id} not found!")
+        raise _response(404, f"Playlist {playlist_id} Not Found!")
 
-    return item
+    return {"playlist": item}
 
 
 # # endpoint to get all playlists
@@ -121,7 +123,7 @@ async def get_playlist():
     table = _get_table()
     data = _get_all_playlists(table)
 
-    return data
+    return {"playlists": data}
 
 
 # # endpoint to update playlist: Remove or add songs
@@ -129,30 +131,44 @@ async def get_playlist():
 async def update_playlist(playlist_id: str, song_id: str, add_track: bool):
     table = _get_table()
     item = _get_playlist(playlist_id, table)
-    songs = []
 
     if item and song_id:
+        songs = item["songs"]
         if add_track:
             # add a track
-            songs = item["songs"]
-            if song_id in songs: # if the song already exists
-                return HTTPException(
-                    status_code=403,
-                    detail=f"Song {song_id} already exist in playlist")
-            else: # add it to the list of songs in the playlist
+            if song_id in songs:  # if the song already exists
+                return _response(403,
+                                 f"Song {song_id} Already Exists In Playlist")
+                #  HTTPException(
+                #     status_code=403,
+                #     detail=f"Song {song_id} Already Exists In Playlist")
+            else:  # add it to the list of songs in the playlist
                 songs.append(song_id)
                 res = _update_playlist(playlist_id, songs, table)
-                return HTTPException(
-                    status_code=res['ResponseMetadata']['HTTPStatusCode'],
-                    detail=f"Song {song_id} added to playlist")
+                return _response(res['ResponseMetadata']['HTTPStatusCode'],
+                                 f"Song {song_id} Added To Playlist")
+                # HTTPException(
+                #     status_code=res['ResponseMetadata']['HTTPStatusCode'],
+                #     detail=f"Song {song_id} Added To Playlist")
 
         else:
             # remove the track
-            # if thing in some_list: some_list.remove(thing)
-            if not item:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Playlist {playlist_id} not found!")
+            if song_id in songs:
+                songs.remove(song_id)
+                res = _update_playlist(playlist_id, songs, table)
+                return _response(res['ResponseMetadata']['HTTPStatusCode'],
+                                 f"Song {song_id} Removed From Playlist")
+                # HTTPException(
+                #     status_code=res['ResponseMetadata']['HTTPStatusCode'],
+                #     detail=f"Song {song_id} Removed From Playlist")
+            else:
+                return _response(404, f"Song {song_id} Not Found In Playlist!")
+
+    if not item:
+        raise _response(404, f"Playlist {playlist_id} Not Found!")
+        # HTTPException(
+        #     status_code=404,
+        #     detail=f"Playlist {playlist_id} not found!")
 
 
 # # endpoint to delete a playlist
