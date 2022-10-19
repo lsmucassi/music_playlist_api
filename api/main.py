@@ -1,4 +1,5 @@
 import os
+from urllib import response
 import uuid
 import boto3
 from fastapi import FastAPI, HTTPException
@@ -61,6 +62,24 @@ def _get_all_playlists(table):
     return data
 
 
+def _update_playlist(playlist_id: str, songs: list, table):
+    
+    try:
+        response = table.update_item(Key = {
+        'playlist_id': playlist_id,
+    },
+    UpdateExpression = "set songs = :r",
+    ExpressionAttributeValues = {
+        ':r': songs,
+    },
+    ReturnValues = "UPDATED_NEW")
+    except:
+        return HTTPException(status_code=501,
+                    detail=f"Internal Server Error")
+
+    return response.status_code
+
+
 # Root of the API
 @app.get("/")
 def root():
@@ -110,17 +129,27 @@ async def get_playlist():
 async def update_playlist(playlist_id: str, song_id: str, removeOrAdd: bool):
     table = _get_table()
     item = _get_playlist(playlist_id, table)
+    songs = []
 
     if item and song_id:
         if removeOrAdd:
             # add a track
             songs = item["songs"]
-            return {"item": item}
+            if song_id in songs:
+                return HTTPException(
+                    status_code=403,
+                    detail=f"Song {playlist_id} already exist in playlist")
+            else:
+                songs.append(song_id)
+                res = _update_playlist(playlist_id, song_id, table)
+
         else:
             # remove the track
+            # if thing in some_list: some_list.remove(thing)
             if not item:
-                raise HTTPException(status_code=404,
-                                    detail=f"Playlist {playlist_id} not found!")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Playlist {playlist_id} not found!")
 
 
 # # endpoint to delete a playlist
