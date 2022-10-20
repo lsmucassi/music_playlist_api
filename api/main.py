@@ -104,9 +104,9 @@ async def get_playlist(playlist_id: str):
 
     item = _get_playlist(playlist_id, table)
     if not item:
-        raise _response(404, f"Playlist {playlist_id} not found!")
+        raise _response(404, f"Playlist {playlist_id} Not Found!")
 
-    return item
+    return {"playlist": item}
 
 
 # # endpoint to get all playlists
@@ -115,7 +115,7 @@ async def get_playlist():
     table = _get_table()
     data = _get_all_playlists(table)
 
-    return data
+    return {"playlists": data}
 
 
 # # endpoint to update playlist: Remove or add songs
