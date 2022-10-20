@@ -54,6 +54,47 @@ pytest
 - [x] /update-playlist - PUT: updates a given playlist using playlist id, either removes a song id or add a song id
 - [x] /delete-playlist/{playlist_id} - DELETE: deletes a playlist by id
 
+---
+
+## Questionaire
+
+Practical Questions (Coding challenge 2)
+• Show how you would expose an endpoint to this microservice
+
+> used Function URL from lambda or API Gateway
+
+• Show how you implement metrics in this microservice
+
+> use cloudwatch, quicksight and a dashboard management system to monitor (reliability, availability and latency)
+
+• Show how you secured this microservice with JWT
+
+> use API Gateway API key, or PyJWT, or Auth0
+
+• Show how you implemented unit testing
+
+> used pytest linbrary, and the fastAPI web interface
+
+• Show how you would implement logging for exception management
+
+> use cloudwatch, database table to log exceptions and faults
+
+Theoretical Questions
+• List which principles you are following with this microservice
+
+> single responsibility: The microservice is only responsible for the operations of playlist and nothing else
+> Loosely coupled: The ms doesn't have to know about the structure of the song data or songs ms,
+> Failure Isolation: With Exception handling, handle failure and make sure the ms doesn't affect the while architecture or app
+> Security: To implement JWT to authorise operation on the ms resources
+
+• List which design patterns you have used with this microservice and why
+
+> using integration pattern (Gateway and Aggregator): With the approach used to deploy the ms on the cloud, the capability of a gateway allows for auth, routing, load balancing and elasticity or scaling.
+
+• List where and why you used some characteristics of object-oriented programming
+
+> It was used to define the playlist model, this is useful as the model can be reused amongst resources/functions/endpoints. This is also a good practice as it limits spaghetti code, when the code is organised in this manner it allows for a single point of fixing/config or addition of the model.
+
 ## Meta
 
 LINDA MUCASSI – [@lsmucassi](https://twitter.com/lsmucassi) – lindasmucassi@gmail.com
