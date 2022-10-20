@@ -20,15 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# song schema
-# class Song(BaseModel):
-#     song_id: str
-
 
 # Playlist Model for Database
 class PutPlaylistReq(BaseModel):
     songs: list
-    # songs: Union[list[Song], None] = None
     playlist_id: Optional[str] = None
     user_id: Optional[str] = None
 
@@ -157,7 +152,9 @@ async def update_playlist(playlist_id: str, song_id: str, add_track: bool):
         raise _response(404, f"Playlist {playlist_id} Not Found!")
 
 
-# # endpoint to delete a playlist
-# @app.delete("/delete-playlist/{playlist_id}")
-# async def delete_playlist(playlist_id: str):
-#     pass
+# endpoint to delete a playlist
+@app.delete("/delete-playlist/{playlist_id}")
+async def delete_playlist(playlist_id: str):
+    table = _get_table()
+    table.delete_item(Key={"playlist_id": playlist_id})
+    return _response(200, f"Delete Playlist: {playlist_id}")
