@@ -59,6 +59,7 @@ pytest
 ## Questionaire
 
 ### Practical Questions (Coding challenge 2)
+
 • Show how you would expose an endpoint to this microservice
 
 > used Function URL from lambda or API Gateway
@@ -80,6 +81,7 @@ pytest
 > use cloudwatch, database table to log exceptions and faults
 
 ### Theoretical Questions
+
 • List which principles you are following with this microservice
 
 > single responsibility: The microservice is only responsible for the operations of playlist and nothing else
@@ -94,6 +96,14 @@ pytest
 • List where and why you used some characteristics of object-oriented programming
 
 > It was used to define the playlist model, this is useful as the model can be reused amongst resources/functions/endpoints. This is also a good practice as it limits spaghetti code, when the code is organised in this manner it allows for a single point of fixing/config or addition of the model.
+
+### Future improvements
+
+- Connect API Gateway to the Lambda, to make handling auth easier and manage load balancing and scalability
+- Implement or handle more exceptions on endpoint requests
+- add more fields on the data model, such as date when tthe playlist was created, date when a song was added or removed, this would change the structure of songs from a list to a json/dict
+- implement proper logging of all activities (requests/processing/response) done to the microservice
+- implement metrices and alerting for any failure, downtime and scaling changes
 
 ## Meta
 
