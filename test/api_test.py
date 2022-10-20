@@ -2,8 +2,6 @@ from uuid import uuid4
 import requests
 import random
 
-from music_playlist_api.api.main import create_playlist
-
 ENDPOINT = "https://vfadintjowlokam5vklcwimxyy0wprvb.lambda-url.us-east-1.on.aws/"
 
 
@@ -48,13 +46,18 @@ def test_update():
     if new_songs:
         song_id = new_songs[0]
         #  remove
-        update_remove_res = update_playlist(new_playlist_id, song_id, add_track=False)
+        update_remove_res = update_playlist(new_playlist_id,
+                                            song_id,
+                                            add_track=False)
         assert update_remove_res.status_code == 200
 
         # add a song
         song_id = f"song_id_{uuid4().hex}"
-        update_add_res = update_playlist(new_playlist_id, song_id, add_track=False)
+        update_add_res = update_playlist(new_playlist_id,
+                                         song_id,
+                                         add_track=False)
         assert update_add_res.status_code == 200
+
 
 def test_delete_playlist():
     '''
@@ -65,6 +68,18 @@ def test_delete_playlist():
     create_res = create_playlist(songs)
     assert create_res.status_code == 200
 
+    # get the recently created playlist and remove a song
+    new_playlist_id = create_res.json()["playlist"]["playlist_id"]
+    get_res = get_playlist(new_playlist_id)
+    assert get_res.status_code == 200
+
+    # remove the playlist
+    delete_res = delete_playlist(new_playlist_id)
+    assert delete_res.status_code == 200
+
+    # try to get deleted playlist, should return a 404
+    get_playlist_res = get_playlist(new_playlist_id)
+    assert get_playlist_res.status_code == 404
 
 
 # ===============================================================================
@@ -98,7 +113,15 @@ def get_playlist(playlist_id: str) -> dict:
     res = requests.get(f"{ENDPOINT}/get-playlist/{playlist_id}")
     return res
 
+
 def update_playlist(playlist_id: str, song_id: str, add_track: bool) -> dict:
     '''updates a playlist by adding or removing a song'''
-    res = requests.put(f"{ENDPOINT}/update-playlist?playlist_id={playlist_id}&song_id={song_id}&add_track={add_track}")
+    res = requests.put(
+        f"{ENDPOINT}/update-playlist?playlist_id={playlist_id}&song_id={song_id}&add_track={add_track}"
+    )
+    return res
+
+
+def delete_playlist(playlist_id: str) -> dict:
+    res = requests.delete(f"{ENDPOINT}/delete-playlist/{playlist_id}")
     return res
