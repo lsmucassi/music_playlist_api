@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# ===============================================================================
 # Playlist Model for Database
 class PutPlaylistReq(BaseModel):
     songs: list
@@ -28,6 +28,7 @@ class PutPlaylistReq(BaseModel):
     user_id: Optional[str] = None
 
 
+# ===============================================================================
 # HELPER FUNCTIONS
 def _get_table():
     table_name = os.environ.get("TABLE_NAME")
@@ -74,9 +75,11 @@ def _response(status_code, message):
     return HTTPException(status_code=status_code, detail=message)
 
 
+# ===============================================================================
 # Root of the API
 @app.get("/")
 def root():
+    ''' root endpoint'''
     return {
         "message": "Welcome to your playlists(Create, Read, Update & Delete"
     }
@@ -85,6 +88,9 @@ def root():
 # endpoint to create a playlist
 @app.put("/create-playlist")
 async def create_playlist(put_playlist_req: PutPlaylistReq):
+    ''' endpoint to create a playlist
+        - takes in playlist, user and songs as a list
+    '''
     item = {
         "playlist_id": f"playlist_{uuid.uuid4().hex}",
         "user_id": put_playlist_req.user_id,
@@ -98,8 +104,11 @@ async def create_playlist(put_playlist_req: PutPlaylistReq):
 
 
 # endpoint to get a single playlist
-@app.get("/get-playlist/{playlist_id")
+@app.get("/get-playlist/{playlist_id}")
 async def get_playlist(playlist_id: str):
+    '''
+        endpoint to get a playlist by ID
+    '''
     table = _get_table()
 
     item = _get_playlist(playlist_id, table)
@@ -112,6 +121,7 @@ async def get_playlist(playlist_id: str):
 # # endpoint to get all playlists
 @app.get("/get-playlists")
 async def get_playlist():
+    ''' endpoint to get all playlists '''
     table = _get_table()
     data = _get_all_playlists(table)
 
@@ -121,6 +131,7 @@ async def get_playlist():
 # # endpoint to update playlist: Remove or add songs
 @app.put("/update-playlist")
 async def update_playlist(playlist_id: str, song_id: str, add_track: bool):
+    ''' endpoint to add or remove a song in a playlist '''
     table = _get_table()
     item = _get_playlist(playlist_id, table)
 
@@ -155,6 +166,7 @@ async def update_playlist(playlist_id: str, song_id: str, add_track: bool):
 # endpoint to delete a playlist
 @app.delete("/delete-playlist/{playlist_id}")
 async def delete_playlist(playlist_id: str):
+    ''' endpoint to deletw a playlist '''
     table = _get_table()
     table.delete_item(Key={"playlist_id": playlist_id})
     return _response(200, f"Delete Playlist: {playlist_id}")

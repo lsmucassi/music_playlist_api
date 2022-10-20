@@ -4,7 +4,8 @@ import random
 
 ENDPOINT = "https://vfadintjowlokam5vklcwimxyy0wprvb.lambda-url.us-east-1.on.aws/"
 
-
+# ===============================================================================
+# TESTS
 def test_create_and_get_playlist():
     '''
     Test the create and get playlist'''
@@ -19,20 +20,20 @@ def test_create_and_get_playlist():
 
     # get the created playlist
     new_playlist_id = create_res.json()["playlist"]["playlist_id"]
-    print(new_playlist_id)
-    get_res = get_playlist(str(new_playlist_id))
+    get_res = get_playlist(new_playlist_id)
     assert get_res.status_code == 200
 
     # compare content
     playlist = get_res.json()
-    assert playlist["user_id"] == user_id
-    assert playlist["songs"] == songs
+    assert playlist["playlist"]["user_id"] == user_id
+    assert playlist["playlist"]["songs"] == songs
 
     pass
 
-
-# helper funcs
-def create_randssngs():
+# ===============================================================================
+# HELPER FUNCTIONS
+def create_randssngs() -> dict:
+    ''' creates random song ids'''
     songs = []
 
     for _ in range(0, random.randint(1, 10)):
@@ -41,7 +42,7 @@ def create_randssngs():
     return songs
 
 
-def create_playlist(playlist_id: str, user_id: str, songs: list):
+def create_playlist(playlist_id: str, user_id: str, songs: list) -> dict:
     ''' creates a payload and request the create endpoint'''
     payload = {
         "playlist_id": playlist_id,
@@ -52,6 +53,8 @@ def create_playlist(playlist_id: str, user_id: str, songs: list):
     return requests.put(f"{ENDPOINT}/create-playlist", json=payload)
 
 
-def get_playlist(playlist_id):
+def get_playlist(playlist_id: str) -> dict:
     ''' calls the get playlist by id endpoint '''
-    return requests.get(f"{ENDPOINT}/get-playlist/{playlist_id}")
+    
+    res = requests.get(f"{ENDPOINT}/get-playlist/{playlist_id}")
+    return res
