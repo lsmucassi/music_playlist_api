@@ -4,6 +4,7 @@ import random
 
 ENDPOINT = "https://vfadintjowlokam5vklcwimxyy0wprvb.lambda-url.us-east-1.on.aws/"
 
+
 # ===============================================================================
 # TESTS
 def test_create_and_get_playlist():
@@ -28,7 +29,18 @@ def test_create_and_get_playlist():
     assert playlist["playlist"]["user_id"] == user_id
     assert playlist["playlist"]["songs"] == songs
 
-    pass
+
+def test_update():
+    '''
+        Test if a song can be added or removed in a playlist
+    '''
+    # create a playlist
+    user_id = f"user_id_{uuid4().hex}"
+    playlist_id = f"playlist_id_{uuid4().hex}"
+    songs = create_randssngs()
+
+    create_res = create_playlist(playlist_id, user_id, songs)
+
 
 # ===============================================================================
 # HELPER FUNCTIONS
@@ -55,6 +67,6 @@ def create_playlist(playlist_id: str, user_id: str, songs: list) -> dict:
 
 def get_playlist(playlist_id: str) -> dict:
     ''' calls the get playlist by id endpoint '''
-    
+
     res = requests.get(f"{ENDPOINT}/get-playlist/{playlist_id}")
     return res
