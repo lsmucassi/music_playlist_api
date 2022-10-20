@@ -58,7 +58,7 @@ pytest
 
 ## Questionaire
 
-Practical Questions (Coding challenge 2)
+### Practical Questions (Coding challenge 2)
 • Show how you would expose an endpoint to this microservice
 
 > used Function URL from lambda or API Gateway
@@ -79,7 +79,7 @@ Practical Questions (Coding challenge 2)
 
 > use cloudwatch, database table to log exceptions and faults
 
-Theoretical Questions
+### Theoretical Questions
 • List which principles you are following with this microservice
 
 > single responsibility: The microservice is only responsible for the operations of playlist and nothing else
