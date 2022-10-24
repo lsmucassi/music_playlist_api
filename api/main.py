@@ -87,7 +87,7 @@ def root():
 
 
 # endpoint to create a playlist
-@app.put("/create-playlist")
+@app.post("/create-playlist")
 async def create_playlist(put_playlist_req: PutPlaylistReq):
     ''' endpoint to create a playlist
         - takes in playlist, user and songs as a list
