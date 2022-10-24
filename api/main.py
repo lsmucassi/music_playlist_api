@@ -20,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # ===============================================================================
 # Playlist Model for Database
 class PutPlaylistReq(BaseModel):
@@ -81,7 +82,7 @@ def _response(status_code, message):
 def root():
     ''' root endpoint'''
     return {
-        "message": "Welcome to your playlists(Create, Read, Update & Delete"
+        "message": "Welcome to your playlists(Create, Read, Update & Delete)"
     }
 
 
@@ -122,6 +123,7 @@ async def get_playlist(playlist_id: str):
 @app.get("/get-playlists")
 async def get_playlist():
     ''' endpoint to get all playlists '''
+
     table = _get_table()
     data = _get_all_playlists(table)
 

@@ -33,6 +33,7 @@ This project aims to:
 All the description of how to query the API is in the link below, also includes testing
 
 - https://vfadintjowlokam5vklcwimxyy0wprvb.lambda-url.us-east-1.on.aws/docs#/
+- [NEW] API ENDPOINT: https://iya9zdvzw7.execute-api.us-east-1.amazonaws.com/dev/ - using API Gateway and access token(API Key)
 
 ## Development setup
 
@@ -123,3 +124,5 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 - `cdk deploy` deploy this stack to your default AWS account/region
 - `cdk diff` compare deployed stack with current state
 - `cdk synth` emits the synthesized CloudFormation template
+
+
